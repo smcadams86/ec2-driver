@@ -22,8 +22,6 @@ import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 
 public class EC2TaskExecutor {
 	
-	public static final String ec2_bin = "E:\\dropbox\\Dropbox\\webcast\\command_line\\ec2-api-tools\\bin\\";
-	
 	private EC2Handle ec2Handle;
 	private AmazonProperties amazonProperties;
 	
@@ -83,10 +81,8 @@ public class EC2TaskExecutor {
 				    .withKeyName(amazonProperties.getEc2_key())
 				    .withUserData(Base64.encodeBase64String(IOUtils.toByteArray(user_data_file)));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//				.withUserData(StringUtils.encodeBase64BinaryFile(user_data_file));
 		    
 		
 		RunInstancesResult runInstances = ec2Handle.getEc2Handle().runInstances(runInstancesRequest);
