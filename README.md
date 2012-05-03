@@ -5,11 +5,12 @@ Start and Stop amazon instance via simple GUI
 
 Usage
 ==========
+``` java
 EC2Driver [-a <arg>] [-p <arg>]
  -a,--aws-credentials <arg>   contains the Amazon Web Services (AWS)
                               credentials of a user
  -p,--properties <arg>        webcasting config file
- 
+```
 
 Example aws-credentials file
 ==========
