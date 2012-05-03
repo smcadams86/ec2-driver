@@ -16,7 +16,7 @@ Example aws-credentials file
 ==========
 ``` java
 accessKey=amazon-access-key
-secretKey=amazon-seret-key
+secretKey=amazon-secret-key
 ```
 
 Example properties file
