@@ -33,11 +33,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.OceanTheme;
+
+import llc.rockford.webcast.worker.CheckAmazonStatusWorker;
+import llc.rockford.webcast.worker.InitializeWorker;
+import llc.rockford.webcast.worker.StartInstanceWorker;
+import llc.rockford.webcast.worker.TerminateInstanceWorker;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -46,14 +52,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-public class EC2Driver {
+public class EC2Driver implements ActionListener {
 
 	JButton startButton;
 	JLabel statusLabel = new JLabel("INITIALIZING");
 	JButton stopButton;
 	
-	EC2StatusMonitor statusMonitor;
-	EC2TaskExecutor taskExecutor;
+	ApplicationState applicationState;
 	EC2Handle ec2Handle;
 	AmazonProperties amazonProperties;
 	
@@ -70,7 +75,21 @@ public class EC2Driver {
 	public EC2Driver(String[] args) { 
 		parseCommandLine(args);
 		createAndShowGUI();
+		applicationState = new ApplicationState(this);
+
+		new InitializeWorker(ec2Handle.getEc2Handle(), applicationState).execute();
+		
+		Timer timer = new Timer(5000, this);
+		timer.setInitialDelay(3000);
+		timer.start(); 
+    
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		new CheckAmazonStatusWorker(ec2Handle.getEc2Handle(), applicationState, amazonProperties).execute();
+	}
+	
 	
 	public Component createComponents() {
 		startButton = new JButton("START");
@@ -79,7 +98,7 @@ public class EC2Driver {
 			public void actionPerformed(ActionEvent e) {
 				startButton.setEnabled(false);
 				stopButton.setEnabled(false);
-				taskExecutor.startInstance();
+				new StartInstanceWorker(ec2Handle.getEc2Handle(), applicationState, amazonProperties).execute();
 			}
 		});
 		
@@ -93,7 +112,7 @@ public class EC2Driver {
 			public void actionPerformed(ActionEvent e) {
 				startButton.setEnabled(false);
 				stopButton.setEnabled(false);
-				taskExecutor.terminateInstance();
+				new TerminateInstanceWorker(ec2Handle.getEc2Handle(), applicationState, amazonProperties).execute();
 			}
 		});
 		
@@ -184,21 +203,6 @@ public class EC2Driver {
 
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(final String[] args) {
-//		new EC2Driver(args);
-		
-		// Schedule a job for the event dispatch thread:
-		// creating and showing this application's GUI.
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new EC2Driver(args);
-			}
-		});
-	}
-
 	protected void parseCommandLine(String[] args) {
 		
 		// create the command line parser
@@ -222,8 +226,6 @@ public class EC2Driver {
 			    
 			    amazonProperties = new AmazonProperties(line.getOptionValue( "properties" ));
 			    ec2Handle = new EC2Handle(amazonProperties, line.getOptionValue( "aws-credentials" ));
-			    taskExecutor = new EC2TaskExecutor(ec2Handle, amazonProperties);
-				statusMonitor = new EC2StatusMonitor(this, ec2Handle, taskExecutor);
 		    }
 		    else {
 		    	// automatically generate the help statement
@@ -237,7 +239,19 @@ public class EC2Driver {
 		    System.out.println( "Unexpected exception:" + exp.getMessage() );
 		}
 		
-		
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(final String[] args) {
+		// Schedule a job for the event dispatch thread:
+		// creating and showing this application's GUI.
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				new EC2Driver(args);
+			}
+		});
 	}
 
 }
