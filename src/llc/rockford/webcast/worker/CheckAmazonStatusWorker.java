@@ -39,14 +39,6 @@ public class CheckAmazonStatusWorker extends SwingWorker<WorkerResult, Integer> 
 	protected void done() {
 		try {
 			WorkerResult result = get();
-			
-			EC2Logger.getInstance();
-			EC2Logger.log("applicationState.getState() : " + applicationState.getState());
-			if (result != null) {
-				EC2Logger.log("result : " + result.getStatus());	
-			}
-			
-			
 			if (result != null) {
 				switch (applicationState.getState()) {
 					case INITIALIZING:
