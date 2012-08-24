@@ -28,6 +28,8 @@ public class AmazonProperties {
 	private String ec2_key;
 	private String ec2_security_group;
 	private String ec2_user_data_file;
+	private String ffmpeg_location;
+	private String ffmpeg_command;
 
 	private String ec2_elastic_ip;
 	
@@ -42,6 +44,8 @@ public class AmazonProperties {
 			ec2_security_group = prop.getProperty("ec2_security_group");
 			ec2_user_data_file = prop.getProperty("ec2_user_data_file");
 			ec2_elastic_ip = prop.getProperty("ec2_elastic_ip");
+			ffmpeg_location = prop.getProperty("ffmpeg_location");
+			ffmpeg_command = prop.getProperty("ffmpeg_command");
 			
 			EC2Logger.getInstance();
 			EC2Logger.log("-- properties loaded --");
@@ -51,6 +55,9 @@ public class AmazonProperties {
 			EC2Logger.log("\tec2_security_group : " + ec2_security_group);
 			EC2Logger.log("\tec2_user_data_file : " + ec2_user_data_file);
 			EC2Logger.log("\tec2_elastic_ip : " + ec2_elastic_ip);
+			EC2Logger.log("\tffmpeg_location : " + ffmpeg_location);
+			EC2Logger.log("\tffmpeg_command : " + ffmpeg_command);
+			
 			
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -143,5 +150,16 @@ public class AmazonProperties {
 	public void setEc2_elastic_ip(String ec2_elastic_ip) {
 		this.ec2_elastic_ip = ec2_elastic_ip;
 	}
+
+	public String getFfmpeg_location() {
+		return ffmpeg_location;
+	}
+
+	public void setFfmpeg_location(String ffmpeg_location) {
+		this.ffmpeg_location = ffmpeg_location;
+	}
 	
+	public String getFfmpeg_command() {
+		return ffmpeg_command;
+	}
 }

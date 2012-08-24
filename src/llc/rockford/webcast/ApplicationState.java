@@ -73,36 +73,42 @@ public class ApplicationState {
 			case INITIALIZING:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
+				guiHandle.startStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("INITIALIZING");
 				guiHandle.statusLabel.setBackground(Color.YELLOW);
 				break;
 			case TERMINATED:
 				guiHandle.startButton.setEnabled(true);
 				guiHandle.stopButton.setEnabled(false);
+				guiHandle.startStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("TERMINATED");
 				guiHandle.statusLabel.setBackground(Color.RED);
 				break;
 			case BOOTING:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
+				guiHandle.startStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("BOOTING UP");
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 				break;
 			case ASSOCIATING_IP:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
+				guiHandle.startStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("ASSOCIATING IP ADDRESS");
 				guiHandle.statusLabel.setBackground(Color.YELLOW);
 				break;
 			case RUNNING:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(true);
+				guiHandle.startStreamButton.setEnabled(true);
 				guiHandle.statusLabel.setText("RUNNING");
 				guiHandle.statusLabel.setBackground(Color.GREEN);
 				break;
 			case SHUTTING_DOWN:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
+				guiHandle.startStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("SHUTTING DOWN");
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 			}

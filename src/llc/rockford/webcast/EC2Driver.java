@@ -42,6 +42,7 @@ import javax.swing.plaf.metal.OceanTheme;
 
 import llc.rockford.webcast.worker.CheckAmazonStatusWorker;
 import llc.rockford.webcast.worker.InitializeWorker;
+import llc.rockford.webcast.worker.RLLCBroadcaster;
 import llc.rockford.webcast.worker.StartInstanceWorker;
 import llc.rockford.webcast.worker.TerminateInstanceWorker;
 
@@ -54,6 +55,7 @@ import org.apache.commons.cli.PosixParser;
 
 public class EC2Driver implements ActionListener {
 
+	JButton startStreamButton;
 	JButton startButton;
 	JLabel statusLabel = new JLabel("INITIALIZING");
 	JButton stopButton;
@@ -61,6 +63,7 @@ public class EC2Driver implements ActionListener {
 	ApplicationState applicationState;
 	EC2Handle ec2Handle;
 	AmazonProperties amazonProperties;
+	RLLCBroadcaster broadcaster;
 	
 	// Specify the look and feel to use by defining the LOOKANDFEEL constant
 	// Valid values are: null (use the default), "Metal", "System", "Motif",
@@ -82,6 +85,8 @@ public class EC2Driver implements ActionListener {
 		Timer timer = new Timer(5000, this);
 		timer.setInitialDelay(3000);
 		timer.start(); 
+		
+		broadcaster = new RLLCBroadcaster(amazonProperties, applicationState);
     
 	}
 	
@@ -102,6 +107,16 @@ public class EC2Driver implements ActionListener {
 			}
 		});
 		
+		startStreamButton = new JButton("START BROADCAST");
+		startStreamButton.setEnabled(false);
+		startStreamButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				startStreamButton.setEnabled(false);
+				broadcaster.start();
+			}
+		});
+		
+		
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel.setOpaque(true);
 		statusLabel.setBackground(Color.YELLOW);
@@ -117,10 +132,12 @@ public class EC2Driver implements ActionListener {
 		});
 		
 		
-		JPanel pane = new JPanel(new GridLayout(3, 1));
+		JPanel pane = new JPanel(new GridLayout(4,1));
 		pane.add(startButton);
 		pane.add(statusLabel);
 		pane.add(stopButton);
+		pane.add(startStreamButton);
+		
 		pane.setBorder(BorderFactory.createEmptyBorder(30, // top
 				30, // left
 				10, // bottom
