@@ -26,12 +26,14 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
@@ -42,8 +44,8 @@ import javax.swing.plaf.metal.OceanTheme;
 
 import llc.rockford.webcast.worker.CheckAmazonStatusWorker;
 import llc.rockford.webcast.worker.InitializeWorker;
-import llc.rockford.webcast.worker.RLLCBroadcaster;
 import llc.rockford.webcast.worker.StartInstanceWorker;
+import llc.rockford.webcast.worker.StreamBroadcaster;
 import llc.rockford.webcast.worker.TerminateInstanceWorker;
 
 import org.apache.commons.cli.CommandLine;
@@ -52,10 +54,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.exec.ExecuteException;
 
 public class EC2Driver implements ActionListener {
 
 	JButton startStreamButton;
+	JButton stopStreamButton;
 	JButton startButton;
 	JLabel statusLabel = new JLabel("INITIALIZING");
 	JButton stopButton;
@@ -63,7 +67,7 @@ public class EC2Driver implements ActionListener {
 	ApplicationState applicationState;
 	EC2Handle ec2Handle;
 	AmazonProperties amazonProperties;
-	RLLCBroadcaster broadcaster;
+	StreamBroadcaster broadcaster;
 	
 	// Specify the look and feel to use by defining the LOOKANDFEEL constant
 	// Valid values are: null (use the default), "Metal", "System", "Motif",
@@ -86,7 +90,7 @@ public class EC2Driver implements ActionListener {
 		timer.setInitialDelay(3000);
 		timer.start(); 
 		
-		broadcaster = new RLLCBroadcaster(amazonProperties, applicationState);
+		broadcaster = new StreamBroadcaster(amazonProperties);
     
 	}
 	
@@ -111,8 +115,27 @@ public class EC2Driver implements ActionListener {
 		startStreamButton.setEnabled(false);
 		startStreamButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				startStreamButton.setEnabled(false);
-				broadcaster.start();
+				startStreamButton.setEnabled(false);
+				stopStreamButton.setEnabled(true);
+				try {
+					broadcaster.start();
+				} catch (ExecuteException e1) {
+					startStreamButton.setEnabled(true);
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					startStreamButton.setEnabled(true);
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		stopStreamButton = new JButton("STOP BROADCAST");
+		stopStreamButton.setEnabled(false);
+		stopStreamButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				startStreamButton.setEnabled(true);
+				stopStreamButton.setEnabled(false);
+				broadcaster.stop();
 			}
 		});
 		
@@ -132,11 +155,13 @@ public class EC2Driver implements ActionListener {
 		});
 		
 		
-		JPanel pane = new JPanel(new GridLayout(4,1));
+		JPanel pane = new JPanel(new GridLayout(6,1));
 		pane.add(startButton);
 		pane.add(statusLabel);
 		pane.add(stopButton);
+		pane.add(new JSeparator(SwingConstants.HORIZONTAL));
 		pane.add(startStreamButton);
+		pane.add(stopStreamButton);
 		
 		pane.setBorder(BorderFactory.createEmptyBorder(30, // top
 				30, // left

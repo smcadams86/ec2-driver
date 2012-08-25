@@ -74,6 +74,7 @@ public class ApplicationState {
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
 				guiHandle.startStreamButton.setEnabled(false);
+				guiHandle.stopStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("INITIALIZING");
 				guiHandle.statusLabel.setBackground(Color.YELLOW);
 				break;
@@ -81,6 +82,7 @@ public class ApplicationState {
 				guiHandle.startButton.setEnabled(true);
 				guiHandle.stopButton.setEnabled(false);
 				guiHandle.startStreamButton.setEnabled(false);
+				guiHandle.stopStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("TERMINATED");
 				guiHandle.statusLabel.setBackground(Color.RED);
 				break;
@@ -88,6 +90,7 @@ public class ApplicationState {
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
 				guiHandle.startStreamButton.setEnabled(false);
+				guiHandle.stopStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("BOOTING UP");
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 				break;
@@ -95,13 +98,21 @@ public class ApplicationState {
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
 				guiHandle.startStreamButton.setEnabled(false);
+				guiHandle.stopStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("ASSOCIATING IP ADDRESS");
 				guiHandle.statusLabel.setBackground(Color.YELLOW);
 				break;
 			case RUNNING:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(true);
-				guiHandle.startStreamButton.setEnabled(true);
+				if (guiHandle.broadcaster.isRunning()) {
+					guiHandle.startStreamButton.setEnabled(false);
+					guiHandle.stopStreamButton.setEnabled(true);
+				}
+				else {
+					guiHandle.startStreamButton.setEnabled(true);
+					guiHandle.stopStreamButton.setEnabled(false);
+				}
 				guiHandle.statusLabel.setText("RUNNING");
 				guiHandle.statusLabel.setBackground(Color.GREEN);
 				break;
@@ -109,6 +120,7 @@ public class ApplicationState {
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(false);
 				guiHandle.startStreamButton.setEnabled(false);
+				guiHandle.stopStreamButton.setEnabled(false);
 				guiHandle.statusLabel.setText("SHUTTING DOWN");
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 			}
