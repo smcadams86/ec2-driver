@@ -62,6 +62,7 @@ public class EC2Driver implements ActionListener {
 	JButton stopStreamButton;
 	JButton startButton;
 	JLabel statusLabel = new JLabel("INITIALIZING");
+	JLabel broadcastStatusLabel = new JLabel("NOT BROADCASTING");
 	JButton stopButton;
 	
 	ApplicationState applicationState;
@@ -101,7 +102,7 @@ public class EC2Driver implements ActionListener {
 	
 	
 	public Component createComponents() {
-		startButton = new JButton("START");
+		startButton = new JButton("START SERVER");
 		startButton.setEnabled(false);
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -125,6 +126,8 @@ public class EC2Driver implements ActionListener {
 				} catch (IOException e1) {
 					startStreamButton.setEnabled(true);
 					e1.printStackTrace();
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -133,8 +136,6 @@ public class EC2Driver implements ActionListener {
 		stopStreamButton.setEnabled(false);
 		stopStreamButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				startStreamButton.setEnabled(true);
-				stopStreamButton.setEnabled(false);
 				broadcaster.stop();
 			}
 		});
@@ -144,7 +145,11 @@ public class EC2Driver implements ActionListener {
 		statusLabel.setOpaque(true);
 		statusLabel.setBackground(Color.YELLOW);
 		
-		stopButton = new JButton("STOP");
+		broadcastStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		broadcastStatusLabel.setOpaque(true);
+		broadcastStatusLabel.setBackground(Color.RED);
+		
+		stopButton = new JButton("STOP SERVER");
 		stopButton.setEnabled(false);
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -155,12 +160,13 @@ public class EC2Driver implements ActionListener {
 		});
 		
 		
-		JPanel pane = new JPanel(new GridLayout(6,1));
+		JPanel pane = new JPanel(new GridLayout(7,1));
 		pane.add(startButton);
 		pane.add(statusLabel);
 		pane.add(stopButton);
 		pane.add(new JSeparator(SwingConstants.HORIZONTAL));
 		pane.add(startStreamButton);
+		pane.add(broadcastStatusLabel);
 		pane.add(stopStreamButton);
 		
 		pane.setBorder(BorderFactory.createEmptyBorder(30, // top

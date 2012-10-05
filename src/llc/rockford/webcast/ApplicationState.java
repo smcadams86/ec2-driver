@@ -27,7 +27,7 @@ public class ApplicationState {
 	private String instance_id;
 	private String ip_id;
 	private EC2Driver guiHandle;
-
+	
 	public static enum EC2_State {
 		INITIALIZING, TERMINATED, BOOTING, ASSOCIATING_IP, RUNNING, SHUTTING_DOWN
 	}
@@ -105,14 +105,6 @@ public class ApplicationState {
 			case RUNNING:
 				guiHandle.startButton.setEnabled(false);
 				guiHandle.stopButton.setEnabled(true);
-				if (guiHandle.broadcaster.isRunning()) {
-					guiHandle.startStreamButton.setEnabled(false);
-					guiHandle.stopStreamButton.setEnabled(true);
-				}
-				else {
-					guiHandle.startStreamButton.setEnabled(true);
-					guiHandle.stopStreamButton.setEnabled(false);
-				}
 				guiHandle.statusLabel.setText("RUNNING");
 				guiHandle.statusLabel.setBackground(Color.GREEN);
 				break;
@@ -125,6 +117,24 @@ public class ApplicationState {
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 			}
 		}
+		
+		if (guiHandle.broadcaster.isRunning()) {
+			guiHandle.startStreamButton.setEnabled(false);
+			guiHandle.stopStreamButton.setEnabled(true);
+			
+			guiHandle.broadcastStatusLabel.setText("BROADCASTING");
+			guiHandle.broadcastStatusLabel.setBackground(Color.GREEN);
+		}
+		else {
+			if (currentState == ApplicationState.EC2_State.RUNNING) {
+				guiHandle.startStreamButton.setEnabled(true);
+			}
+			guiHandle.stopStreamButton.setEnabled(false);
+			
+			guiHandle.broadcastStatusLabel.setText("NOT BROADCASTING");
+			guiHandle.broadcastStatusLabel.setBackground(Color.RED);
+		}
+		
 	}
 
 	public EC2_State getState() {
