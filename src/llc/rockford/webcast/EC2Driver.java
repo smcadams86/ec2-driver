@@ -92,6 +92,14 @@ public class EC2Driver implements ActionListener {
 		timer.start(); 
 		
 		broadcaster = new StreamBroadcaster(amazonProperties);
+
+		// add shut down hooks to terminate amazon EC2 instance
+		// to prevent over billing
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				new TerminateInstanceWorker(ec2Handle.getEc2Handle(), applicationState, amazonProperties).execute();
+			}
+		});
     
 	}
 	
