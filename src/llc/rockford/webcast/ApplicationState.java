@@ -24,12 +24,17 @@ import java.util.Map;
 
 public class ApplicationState {
 
+	private static final long secondInMillis = 1000;
+	private static final long SECONDS_TO_INSTALL_WOWZA = 120; // 2 min
+
 	private String instance_id;
 	private String ip_id;
 	private EC2Driver guiHandle;
-	
+	private boolean wowza_installed;
+	private long startTime = 0;
+
 	public static enum EC2_State {
-		INITIALIZING, TERMINATED, BOOTING, ASSOCIATING_IP, RUNNING, SHUTTING_DOWN
+		INITIALIZING, TERMINATED, BOOTING, ASSOCIATING_IP, INSTALLING_WOWZA, RUNNING, SHUTTING_DOWN
 	}
 
 	private Map<String, EC2_State> amazon_to_state;
@@ -42,7 +47,7 @@ public class ApplicationState {
 		aMap.put("running", EC2_State.RUNNING);
 		aMap.put("terminated", EC2_State.TERMINATED);
 		amazon_to_state = Collections.unmodifiableMap(aMap);
-		
+		wowza_installed = false;
 		this.guiHandle = guiHandle;
 	}
 
@@ -65,10 +70,14 @@ public class ApplicationState {
 	}
 
 	public void setState(String amazon_state) {
+		if (startTime != 0 && !wowza_installed) {
+			checkTimer();
+		}
+
 		if (currentState != amazon_to_state.get(amazon_state)) {
 			EC2Logger.log("setState(" + amazon_state + ")");
 			currentState = amazon_to_state.get(amazon_state);
-			
+
 			switch (currentState) {
 			case INITIALIZING:
 				guiHandle.startButton.setEnabled(false);
@@ -103,10 +112,20 @@ public class ApplicationState {
 				guiHandle.statusLabel.setBackground(Color.YELLOW);
 				break;
 			case RUNNING:
-				guiHandle.startButton.setEnabled(false);
-				guiHandle.stopButton.setEnabled(true);
-				guiHandle.statusLabel.setText("RUNNING");
-				guiHandle.statusLabel.setBackground(Color.GREEN);
+				if (startTime == 0) {
+					startTime = System.currentTimeMillis();
+				}
+				// insert artificial delay for wowza install
+				if (wowza_installed == false) {
+					currentState = EC2_State.INSTALLING_WOWZA;
+					guiHandle.statusLabel.setText("INSTALLING SOFTWARE");
+					guiHandle.statusLabel.setBackground(Color.YELLOW);
+				} else {
+					guiHandle.startButton.setEnabled(false);
+					guiHandle.stopButton.setEnabled(true);
+					guiHandle.statusLabel.setText("RUNNING");
+					guiHandle.statusLabel.setBackground(Color.GREEN);
+				}
 				break;
 			case SHUTTING_DOWN:
 				guiHandle.startButton.setEnabled(false);
@@ -117,24 +136,35 @@ public class ApplicationState {
 				guiHandle.statusLabel.setBackground(Color.ORANGE);
 			}
 		}
-		
+
 		if (guiHandle.broadcaster.isRunning()) {
 			guiHandle.startStreamButton.setEnabled(false);
 			guiHandle.stopStreamButton.setEnabled(true);
-			
+
 			guiHandle.broadcastStatusLabel.setText("BROADCASTING");
 			guiHandle.broadcastStatusLabel.setBackground(Color.GREEN);
-		}
-		else {
+		} else {
 			if (currentState == ApplicationState.EC2_State.RUNNING) {
 				guiHandle.startStreamButton.setEnabled(true);
 			}
 			guiHandle.stopStreamButton.setEnabled(false);
-			
+
 			guiHandle.broadcastStatusLabel.setText("NOT BROADCASTING");
 			guiHandle.broadcastStatusLabel.setBackground(Color.RED);
 		}
-		
+	}
+
+	private void checkTimer() {
+		long diff = System.currentTimeMillis() - startTime;
+		long elapsedSeconds = diff / secondInMillis;
+
+		EC2Logger.getInstance();
+		EC2Logger.log("elapsedSeconds : " + elapsedSeconds);
+		EC2Logger.log("(elapsedSeconds > SECONDS_TO_INSTALL_WOWZA) : "
+				+ (elapsedSeconds > SECONDS_TO_INSTALL_WOWZA));
+		if (elapsedSeconds > SECONDS_TO_INSTALL_WOWZA) {
+			wowza_installed = true;
+		}
 	}
 
 	public EC2_State getState() {
